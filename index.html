@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anizen - Top Anime</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background: #0d1117;
+      color: #fff;
+    }
+
+    header {
+      background: #161b22;
+      padding: 25px;
+      text-align: center;
+      font-size: 2.8rem;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: bold;
+      color: #ff4d6d;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px #ff4d6d, 0 0 20px #ff4d6d;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin: 20px auto;
+      flex-wrap: wrap;
+    }
+
+    input, select {
+      padding: 12px;
+      border-radius: 25px;
+      border: none;
+      font-size: 1rem;
+    }
+
+    .anime-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(6, auto);
+      gap: 20px;
+      padding: 20px 40px;
+      justify-items: center;
+    }
+
+    .anime-card {
+      background: #1b1f27;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(255,77,109,0.5);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+      width: 180px;
+      position: relative;
+    }
+
+    .anime-card img {
+      width: 100%;
+      height: 260px;
+      object-fit: cover;
+    }
+
+    .anime-card h3 {
+      margin: 8px 0;
+      font-size: 1.1rem;
+      text-align: center;
+      color: #ff4d6d;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .anime-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 0.85rem;
+      color: #c5c6c7;
+      gap: 3px;
+    }
+
+    .anime-card:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 25px rgba(255,77,109,0.8);
+    }
+
+    .anime-card.active {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 80%;
+      max-width: 900px;
+      height: auto;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      transition: all 0.5s ease-in-out;
+    }
+
+    .anime-details {
+      padding: 20px;
+      background: #0d1117;
+      color: #fff;
+      display: none;
+    }
+
+    .anime-details h2 {
+      margin-top: 0;
+      color: #ff4d6d;
+      font-family: 'Orbitron', sans-serif;
+      text-shadow: 0 0 5px #ff4d6d;
+    }
+
+    .anime-details p {
+      line-height: 1.5;
+      font-size: 1rem;
+    }
+
+    .comments {
+      padding: 10px 0;
+      background: #0d1117;
+      border-top: 1px solid #ff4d6d;
+    }
+
+    .comments input {
+      width: 75%;
+      padding: 5px;
+      border-radius: 10px;
+      border: none;
+    }
+
+    .comments button {
+      padding: 5px 10px;
+      margin-left: 5px;
+      border: none;
+      border-radius: 5px;
+      background: #ff4d6d;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .comments ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 10px;
+    }
+
+    .comments ul li {
+      background: #1b1f27;
+      padding: 5px;
+      margin: 5px 0;
+      border-radius: 5px;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #fff;
+      background: #ff4d6d;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    footer {
+      background: #161b22;
+      padding: 20px;
+      text-align: center;
+      color: #fff;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <header>Anizen - Top Anime</header>
+
+  <div class="controls">
+    <input type="text" id="searchBox" placeholder="Search Anime...">
+    <select id="genreFilter">
+      <option value="">All Genres</option>
+      <option value="Action">Action</option>
+      <option value="Adventure">Adventure</option>
+      <option value="Fantasy">Fantasy</option>
+      <option value="Shonen">Shonen</option>
+      <option value="Supernatural">Supernatural</option>
+      <option value="Sports">Sports</option>
+    </select>
+    <select id="sortFilter">
+      <option value="">Sort By</option>
+      <option value="rating">Rating</option>
+      <option value="episodes">Episodes</option>
+    </select>
+  </div>
+
+  <div class="anime-container" id="animeList"></div>
+
+  <footer>
+    Facebook: Aasura AMV | YT: Kaizenxyz <br>
+    &copy; 2025 Anizen. All Rights Reserved. Your source for top anime recommendations.
+  </footer>
+
+  <script>
+    const animeList = [
+      {name: "Attack on Titan", img: "https://cdn.myanimelist.net/images/anime/10/47347.jpg", episodes: 75, release: "2013-04-07", rating: 9.0, story: "Eren Yeager joins the Survey Corps to fight Titans.", genre: "Action"},
+      {name: "Death Note", img: "https://cdn.myanimelist.net/images/anime/9/9453.jpg", episodes: 37, release: "2006-10-04", rating: 9.0, story: "A student discovers a notebook that can kill anyone.", genre: "Supernatural"},
+      {name: "Naruto", img: "https://cdn.myanimelist.net/images/anime/13/17405.jpg", episodes: 220, release: "2002-10-03", rating: 8.2, story: "Naruto seeks recognition and dreams of becoming Hokage.", genre: "Shonen"},
+      {name: "One Piece", img: "https://cdn.myanimelist.net/images/anime/6/73245.jpg", episodes: 1050, release: "1999-10-20", rating: 8.9, story: "Monkey D. Luffy searches for the ultimate treasure.", genre: "Adventure"},
+      {name: "Dragon Ball Z", img: "https://cdn.myanimelist.net/images/anime/1607/117271.jpg", episodes: 291, release: "1989-04-26", rating: 8.7, story: "Goku defends Earth and trains to be strongest.", genre: "Action"},
+      {name: "Fullmetal Alchemist: Brotherhood", img: "https://cdn.myanimelist.net/images/anime/1208/94745.jpg", episodes: 64, release: "2009-04-05", rating: 9.2, story: "Two brothers restore their bodies after a failed experiment.", genre: "Adventure"},
+      {name: "Demon Slayer", img: "https://cdn.myanimelist.net/images/anime/1286/99889.jpg", episodes: 26, release: "2019-04-06", rating: 8.8, story: "Tanjiro becomes a demon slayer to save his sister.", genre: "Fantasy"},
+      {name: "Jujutsu Kaisen", img: "https://cdn.myanimelist.net/images/anime/1171/109222.jpg", episodes: 24, release: "2020-10-03", rating: 8.9, story: "Yuji Itadori joins a secret organization to fight curses.", genre: "Action"},
+      {name: "Tokyo Ghoul", img: "https://cdn.myanimelist.net/images/anime/5/64449.jpg", episodes: 12, release: "2014-07-04", rating: 7.9, story: "Kaneki becomes a half-ghoul after a deadly encounter.", genre: "Supernatural"},
+      {name: "Sword Art Online", img: "https://cdn.myanimelist.net/images/anime/11/39717.jpg", episodes: 25, release: "2012-07-08", rating: 7.6, story: "Players trapped in a VR game where dying means death.", genre: "Fantasy"},
+      {name: "My Hero Academia", img: "https://cdn.myanimelist.net/images/anime/10/78745.jpg", episodes: 88, release: "2016-04-03", rating: 8.4, story: "Izuku dreams of becoming a hero in a superpowered world.", genre: "Shonen"},
+      {name: "Bleach", img: "https://cdn.myanimelist.net/images/anime/3/40451.jpg", episodes: 366, release: "2004-10-05", rating: 8.1, story: "Ichigo gains Soul Reaper powers to fight evil spirits.", genre: "Action"},
+    ];
+
+    const listContainer = document.getElementById("animeList");
+    const searchBox = document.getElementById("searchBox");
+    const genreFilter = document.getElementById("genreFilter");
+    const sortFilter = document.getElementById("sortFilter");
+
+    function renderList() {
+      let filtered = animeList.filter(anime => 
+        anime.name.toLowerCase().includes(searchBox.value.toLowerCase()) &&
+        (genreFilter.value === "" || anime.genre === genreFilter.value)
+      );
+
+      if(sortFilter.value === "rating"){
+        filtered.sort((a,b) => b.rating - a.rating);
+      } else if(sortFilter.value === "episodes"){
+        filtered.sort((a,b) => b.episodes - a.episodes);
+      }
+
+      listContainer.innerHTML = "";
+      filtered.slice(0, 12).forEach(anime => {
+        const card = document.createElement("div");
+        card.className = "anime-card";
+        card.innerHTML = `
+          <img src="${anime.img}" alt="${anime.name}">
+          <h3>${anime.name}</h3>
+          <div class="anime-meta">
+            <div>Episodes: ${anime.episodes}</div>
+            <div>Release: ${anime.release}</div>
+            <div>Rating: ${anime.rating}</div>
+          </div>
+          <div class="anime-details">
+            <h2>${anime.name}</h2>
+            <p>${anime.story}</p>
+            <div class="comments">
+              <input type="text" placeholder="Add a comment">
+              <button>Post</button>
+              <ul></ul>
+            </div>
+            <div class="close-btn">&times;</div>
+          </div>
+        `;
+
+        const details = card.querySelector(".anime-details");
+        const closeBtn = card.querySelector(".close-btn");
+
+        card.addEventListener("click", e => {
+          if(!details.contains(e.target)){
+            details.style.display = "block";
+            card.classList.add("active");
+          }
+        });
+
+        closeBtn.addEventListener("click", e => {
+          e.stopPropagation();
+          details.style.display = "none";
+          card.classList.remove("active");
+        });
+
+        const btn = card.querySelector("button");
+        btn.addEventListener("click", e => {
+          e.stopPropagation();
+          const input = card.querySelector("input");
+          const ul = card.querySelector("ul");
+          if(input.value.trim() !== ""){
+            const li = document.createElement("li");
+            li.textContent = input.value;
+            ul.appendChild(li);
+            input.value = "";
+          }
+        });
+
+        listContainer.appendChild(card);
+      });
+    }
+
+    searchBox.addEventListener("input", renderList);
+    genreFilter.addEventListener("change", renderList);
+    sortFilter.addEventListener("change", renderList);
+
+    setInterval(renderList, 30000);
+
+    renderList();
+  </script>
+</body>
+</html>
